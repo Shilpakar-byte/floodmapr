@@ -1,0 +1,15 @@
+# Ignore the virtual environment
+Env1/
+
+# Ignore executable files
+*.exe
+
+# Ignore the Microsoft VS Code folder
+Microsoft VS Code/
+
+# Ignore other directories
+Landslide/
+floodmapr/
+
+# Ignore log files
+*.log
