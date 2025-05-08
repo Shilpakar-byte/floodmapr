@@ -16,9 +16,11 @@ def detect_flood(input_path, image_type='sar', threshold=-15, optical_threshold=
 
             green = bands[1].astype(np.float32)
             nir = bands[3].astype(np.float32)
+            swir = bands[4].astype(np.float32)
 
             ndwi = (green - nir) / (green + nir + 1e-6)
-            flood_mask = ndwi > optical_threshold
+            mndwi = (green - swir) / (green + swir + 1e-6)
+            flood_mask = mndwi > optical_threshold
 
         else:
             raise ValueError("Invalid image_type. Choose 'sar' or 'optical'.")
