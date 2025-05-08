@@ -25,11 +25,23 @@ if uploaded_file is not None:
 
         # Show flood mask
         st.subheader("🗺️ Flood Map")
-        fig1, ax1 = plt.subplots()
-        ax1.imshow(mask, cmap='Blues')
-        ax1.set_title("Detected Water")
-        ax1.axis("off")
-        st.pyplot(fig1)
+        with rasterio.open(tmp_path) as src:
+            transform = src.transform
+
+            height, width = mask.shape
+            left, top = transform * (0, 0)
+            right, bottom = transform * (width, height)
+
+            extent = [left, right, bottom, top]
+
+            fig1, ax1 = plt.subplots()
+            im = ax1.imshow(mask, cmap='Blues', extent=extent, origin='upper')
+            ax1.set_title("Detected Water with Lat/Lon")
+            ax1.set_xlabel("Longitude")
+            ax1.set_ylabel("Latitude")
+            ax1.grid(True, color='white', linestyle='--', linewidth=0.5)
+            st.pyplot(fig1)
+
 
         # Show estimated area in smaller font just below map
         st.markdown(f"<p style='font-size: 18px;'>🌍 <b>Estimated Flooded Area:</b> {area:.2f} sq.km</p>", unsafe_allow_html=True)
