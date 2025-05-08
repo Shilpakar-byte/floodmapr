@@ -27,9 +27,12 @@ if uploaded_file is not None:
         st.subheader("🗺️ Flood Map")
         fig1, ax1 = plt.subplots()
         ax1.imshow(mask, cmap='Blues')
-        ax1.set_title("Detected Flood Zones")
+        ax1.set_title("Detected Water")
         ax1.axis("off")
         st.pyplot(fig1)
+
+        # Show estimated area in smaller font just below map
+        st.markdown(f"<p style='font-size: 14px;'>🌍 <b>Estimated Flooded Area:</b> {area:.2f} sq.km</p>", unsafe_allow_html=True)
 
         # Try to show original image (RGB or first band)
         with rasterio.open(tmp_path) as src:
@@ -45,8 +48,6 @@ if uploaded_file is not None:
                 ax2.set_title("Original Image (Single Band)")
             ax2.axis("off")
             st.pyplot(fig2)
-
-        st.success(f"Estimated Flooded Area: {area:.2f} sq.km")
 
         if st.button("Download PDF Report"):
             os.makedirs("output", exist_ok=True)
