@@ -32,7 +32,7 @@ if uploaded_file is not None:
         st.pyplot(fig1)
 
         # Show estimated area in smaller font just below map
-        st.markdown(f"<p style='font-size: 14px;'>🌍 <b>Estimated Flooded Area:</b> {area:.2f} sq.km</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 18px;'>🌍 <b>Estimated Flooded Area:</b> {area:.2f} sq.km</p>", unsafe_allow_html=True)
 
         # Try to show original image (RGB or first band)
         with rasterio.open(tmp_path) as src:
