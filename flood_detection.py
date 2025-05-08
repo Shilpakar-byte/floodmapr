@@ -11,7 +11,7 @@ def detect_flood(input_path, image_type='sar', threshold=-15, optical_threshold=
             flood_mask = band < threshold
 
         elif image_type == 'optical':
-            if bands.shape[0] < 4:
+            if bands.shape[0] < 0.5:
                 raise ValueError("Optical image must have at least 4 bands (e.g. Blue, Green, Red, NIR)")
 
             green = bands[1].astype(np.float32)
