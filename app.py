@@ -7,6 +7,7 @@ import os
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import rasterio
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 st.title("🌊 Flood Detection from Satellite Images")
 
@@ -19,7 +20,7 @@ if uploaded_file is not None:
         tmp_path = tmp.name
 
     try:
-        # Detect flood using original function
+        # Detect flood using the adjusted function
         mask, profile = detect_flood(tmp_path, image_type=image_type.lower())
         area = calculate_flood_area(mask)
 
@@ -39,9 +40,20 @@ if uploaded_file is not None:
             ax1.set_title("Detected Water with Lat/Lon")
             ax1.set_xlabel("Longitude")
             ax1.set_ylabel("Latitude")
-            ax1.grid(False, color='white', linestyle='--', linewidth=0.5)
-            st.pyplot(fig1)
+            ax1.grid(False)  # Remove grid lines
 
+            # Add scale bar
+            axins = inset_axes(ax1, width="5%", height="5%", loc="lower right", borderpad=3)
+            axins.set_facecolor("white")
+            axins.set_xticks([])
+            axins.set_yticks([])
+
+            # Customize the scale bar based on the actual scale (e.g., 10 km)
+            scale_length = 10  # Example scale length (e.g., 10 km)
+            axins.plot([0, scale_length], [0, 0], color="black", lw=6)
+            axins.text(0.5, 0, f"{scale_length} km", horizontalalignment="center", verticalalignment="bottom", fontsize=10, color="black")
+            
+            st.pyplot(fig1)
 
         # Show estimated area in smaller font just below map
         st.markdown(f"<p style='font-size: 18px;'>🌍 <b>Estimated Flooded Area:</b> {area:.2f} sq.km</p>", unsafe_allow_html=True)
@@ -61,6 +73,7 @@ if uploaded_file is not None:
             ax2.axis("off")
             st.pyplot(fig2)
 
+        # Download PDF Report Button
         if st.button("Download PDF Report"):
             os.makedirs("output", exist_ok=True)
             pdf_path = "output/flood_report.pdf"
