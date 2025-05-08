@@ -39,7 +39,7 @@ if uploaded_file is not None:
             ax1.set_title("Detected Water with Lat/Lon")
             ax1.set_xlabel("Longitude")
             ax1.set_ylabel("Latitude")
-            ax1.grid(True, color='white', linestyle='--', linewidth=0.5)
+            ax1.grid(False, color='white', linestyle='--', linewidth=0.5)
             st.pyplot(fig1)
 
 
