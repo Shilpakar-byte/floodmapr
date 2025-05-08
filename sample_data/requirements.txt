@@ -1,9 +1,0 @@
-streamlit
-rasterio
-geopandas
-matplotlib
-numpy
-scikit-image
-shapely
-fpdf
-    
