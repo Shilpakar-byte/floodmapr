@@ -36,7 +36,7 @@ if uploaded_file is not None:
 
             fig1, ax1 = plt.subplots()
             ax1.imshow(mask, cmap='Blues', extent=extent, origin='upper')
-            ax1.set_title("Detected Flood Zones")
+            ax1.set_title("Detected Water")
             ax1.axis("off")  # Remove axis labels and ticks
             st.pyplot(fig1)
 
