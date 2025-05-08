@@ -1,7 +1,7 @@
 import rasterio
 import numpy as np
 
-def detect_flood(input_path, image_type='sar', threshold=-18, optical_threshold=0.3):
+def detect_flood(input_path, image_type='sar', threshold=-17, optical_threshold=0.3):
     with rasterio.open(input_path) as src:
         profile = src.profile
         bands = src.read()
