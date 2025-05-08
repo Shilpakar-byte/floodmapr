@@ -6,24 +6,33 @@ import tempfile
 import os
 
 st.title("🌊 Flood Detection from Satellite Images")
-uploaded_file = st.file_uploader("Upload a Sentinel-1 GeoTIFF", type=["tif", "tiff"])
+
+# Let user choose image type
+image_type = st.selectbox("Select Image Type", options=["SAR", "Optical"])
+
+uploaded_file = st.file_uploader("Upload a GeoTIFF image", type=["tif", "tiff"])
 
 if uploaded_file is not None:
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         tmp.write(uploaded_file.read())
         tmp_path = tmp.name
 
-    mask, profile = detect_flood(tmp_path)
-    area = calculate_flood_area(mask)
+    try:
+        mask, profile = detect_flood(tmp_path, image_type=image_type.lower())
+        area = calculate_flood_area(mask)
 
-    st.subheader("🗺️ Flood Map")
-    plt.imshow(mask, cmap='Blues')
-    plt.title("Detected Flood Zones")
-    st.pyplot(plt)
+        st.subheader("🗺️ Flood Map")
+        plt.imshow(mask, cmap='Blues')
+        plt.title("Detected Flood Zones")
+        st.pyplot(plt)
 
-    st.success(f"Estimated Flooded Area: {area} sq.km")
+        st.success(f"Estimated Flooded Area: {area} sq.km")
 
-    if st.button("Download Flood Map"):
-        plt.imsave("output/flood_map.png", mask, cmap="Blues")
-        with open("output/flood_map.png", "rb") as img:
-            st.download_button("Download PNG", img, "flood_map.png")
+        if st.button("Download Flood Map"):
+            os.makedirs("output", exist_ok=True)
+            output_path = "output/flood_map.png"
+            plt.imsave(output_path, mask, cmap="Blues")
+            with open(output_path, "rb") as img:
+                st.download_button("Download PNG", img, "flood_map.png")
+    except Exception as e:
+        st.error(f"❌ Error during flood detection: {str(e)}")
