@@ -21,31 +21,30 @@ if uploaded_file is not None:
         tmp_path = tmp.name
 
     try:
-        # Detect flood using the adjusted function
+        # Detect flood and calculate area
         mask, profile = detect_flood(tmp_path, image_type=image_type.lower())
         area = calculate_flood_area(mask)
 
-        # Show flood mask
-        st.subheader("🗺️ Flood Map")
+        # Load image to get geospatial extent
         with rasterio.open(tmp_path) as src:
             transform = src.transform
-
             height, width = mask.shape
             left, top = transform * (0, 0)
             right, bottom = transform * (width, height)
-
             extent = [left, right, bottom, top]
 
-            fig1, ax1 = plt.subplots()
-            ax1.imshow(mask, cmap='Blues', extent=extent, origin='upper')
-            ax1.set_title("Detected Water")
-            ax1.axis("off")  # Remove axis labels and ticks
-            st.pyplot(fig1)
+        # Display flood mask
+        st.subheader("🗺️ Flood Map")
+        fig1, ax1 = plt.subplots()
+        ax1.imshow(mask, cmap='Blues', extent=extent, origin='upper')
+        ax1.set_title("Detected Water")
+        ax1.axis("off")
+        st.pyplot(fig1)
 
-        # Show estimated area in smaller font just below map
+        # Show estimated flooded area
         st.markdown(f"<p style='font-size: 18px;'>🌍 <b>Estimated Flooded Area:</b> {area:.2f} sq.km</p>", unsafe_allow_html=True)
 
-        # Try to show original image (RGB or first band)
+        # Display original image (RGB or grayscale)
         with rasterio.open(tmp_path) as src:
             bands = src.read()
             fig2, ax2 = plt.subplots()
@@ -59,55 +58,45 @@ if uploaded_file is not None:
                 ax2.set_title("Original Image (Single Band)")
             ax2.axis("off")
             st.pyplot(fig2)
-        
-        if st.button("Download PDF Report"):
+
+        # Generate Bonus PDF Report with metadata and image
+        if st.button("📥 Download Bonus PDF Report"):
             os.makedirs("output", exist_ok=True)
             map_image_path = "output/flood_map.png"
 
-                # Save flood map image first
-            with rasterio.open(tmp_path) as src:
-                transform = src.transform
-                height, width = mask.shape
-                left, top = transform * (0, 0)
-                right, bottom = transform * (width, height)
-                extent = [left, right, bottom, top]
-
-                fig, ax = plt.subplots()
-                ax.imshow(mask, cmap="Blues", extent=extent, origin='upper')
-                ax.set_title("Detected Flood Zones")
-                ax.set_xlabel("Longitude")
-                ax.set_ylabel("Latitude")
-                ax.grid(True, color='white', linestyle='--', linewidth=0.5)
-                plt.tight_layout()
-                fig.savefig(map_image_path, dpi=150)
-                plt.close(fig)
+            # Save map with lat/lon grid
+            fig, ax = plt.subplots()
+            ax.imshow(mask, cmap="Blues", extent=extent, origin='upper')
+            ax.set_title("Detected Flood Zones")
+            ax.set_xlabel("Longitude")
+            ax.set_ylabel("Latitude")
+            ax.grid(True, color='white', linestyle='--', linewidth=0.5)
+            plt.tight_layout()
+            fig.savefig(map_image_path, dpi=150)
+            plt.close(fig)
 
             # Create PDF
             pdf = FPDF()
             pdf.add_page()
 
-            # Title
             pdf.set_font("Arial", "B", 16)
             pdf.cell(0, 10, "Flood Detection Report", ln=True, align='C')
 
-            # Timestamp
             pdf.set_font("Arial", size=12)
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            pdf.cell(0, 10, f"Timestamp: {timestamp}", ln=True)
-
-            # Area info
-            pdf.cell(0, 10, f"Estimated Flooded Area: {area:.2f} sq.km", ln=True)
+            pdf.ln(10)
+            pdf.cell(0, 10, f"🕒 Timestamp: {timestamp}", ln=True)
+            pdf.cell(0, 10, f"🌍 Estimated Flooded Area: {area:.2f} sq.km", ln=True)
 
             # Add flood map image
-            pdf.image(map_image_path, x=10, y=50, w=180)
+            pdf.ln(10)
+            pdf.image(map_image_path, x=10, y=60, w=180)
 
-            # Save PDF
             pdf_path = "output/flood_report_bonus.pdf"
             pdf.output(pdf_path)
 
-            # Offer download
             with open(pdf_path, "rb") as f:
-                st.download_button("📥 Download Bonus PDF Report", f, "flood_report_bonus.pdf", mime="application/pdf")
+                st.download_button("📄 Download PDF", f, "flood_report_bonus.pdf", mime="application/pdf")
 
     except Exception as e:
         st.error(f"❌ Error during flood detection: {str(e)}")
