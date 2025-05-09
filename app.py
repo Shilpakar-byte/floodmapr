@@ -60,17 +60,17 @@ if uploaded_file is not None:
             st.pyplot(fig2)
 
         # Generate Bonus PDF Report with metadata and image
-        if st.button("📥 Download Bonus PDF Report"):
+        if st.button("📥 Download PDF Report"):
             os.makedirs("output", exist_ok=True)
             map_image_path = "output/flood_map.png"
 
             # Save map with lat/lon grid
             fig, ax = plt.subplots()
             ax.imshow(mask, cmap="Blues", extent=extent, origin='upper')
-            ax.set_title("Detected Flood Zones")
+            ax.set_title("Detected Water")
             ax.set_xlabel("Longitude")
             ax.set_ylabel("Latitude")
-            ax.grid(True, color='white', linestyle='--', linewidth=0.5)
+            ax.grid(False, color='white', linestyle='--', linewidth=0.5)
             plt.tight_layout()
             fig.savefig(map_image_path, dpi=150)
             plt.close(fig)
@@ -80,13 +80,13 @@ if uploaded_file is not None:
             pdf.add_page()
 
             pdf.set_font("Arial", "B", 16)
-            pdf.cell(0, 10, "Flood Detection Report", ln=True, align='C')
+            pdf.cell(0, 10, "Report", ln=True, align='C')
 
             pdf.set_font("Arial", size=12)
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             pdf.ln(10)
             pdf.cell(0, 10, f"Timestamp: {timestamp}", ln=True)
-            pdf.cell(0, 10, f"Estimated Flooded Area: {area:.2f} sq.km", ln=True)
+            pdf.cell(0, 10, f"Estimated Water Area: {area:.2f} sq.km", ln=True)
 
             # Add flood map image
             pdf.ln(10)
@@ -99,4 +99,4 @@ if uploaded_file is not None:
                 st.download_button("📄 Download PDF", f, "flood_report_bonus.pdf", mime="application/pdf")
 
     except Exception as e:
-        st.error(f"❌ Error during flood detection: {str(e)}")
+        st.error(f" Seems like theres and issue: {str(e)}")
