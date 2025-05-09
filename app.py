@@ -85,8 +85,8 @@ if uploaded_file is not None:
             pdf.set_font("Arial", size=12)
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             pdf.ln(10)
-            pdf.cell(0, 10, f"🕒 Timestamp: {timestamp}", ln=True)
-            pdf.cell(0, 10, f"🌍 Estimated Flooded Area: {area:.2f} sq.km", ln=True)
+            pdf.cell(0, 10, f"Timestamp: {timestamp}", ln=True)
+            pdf.cell(0, 10, f"Estimated Flooded Area: {area:.2f} sq.km", ln=True)
 
             # Add flood map image
             pdf.ln(10)
