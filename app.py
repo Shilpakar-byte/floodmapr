@@ -7,6 +7,8 @@ import os
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import rasterio
+from fpdf import FPDF
+from datetime import datetime
 
 st.title("🌊 Flood Detection from Satellite Images")
 
@@ -57,30 +59,55 @@ if uploaded_file is not None:
                 ax2.set_title("Original Image (Single Band)")
             ax2.axis("off")
             st.pyplot(fig2)
-
-        # Download PDF Report Button
+        
         if st.button("Download PDF Report"):
             os.makedirs("output", exist_ok=True)
-            pdf_path = "output/flood_report.pdf"
+            map_image_path = "output/flood_map.png"
 
-            with PdfPages(pdf_path) as pdf:
-                # Page 1: Flood mask
+                # Save flood map image first
+            with rasterio.open(tmp_path) as src:
+                transform = src.transform
+                height, width = mask.shape
+                left, top = transform * (0, 0)
+                right, bottom = transform * (width, height)
+                extent = [left, right, bottom, top]
+
                 fig, ax = plt.subplots()
-                ax.imshow(mask, cmap="Blues")
+                ax.imshow(mask, cmap="Blues", extent=extent, origin='upper')
                 ax.set_title("Detected Flood Zones")
-                ax.axis("off")
-                pdf.savefig(fig)
+                ax.set_xlabel("Longitude")
+                ax.set_ylabel("Latitude")
+                ax.grid(True, color='white', linestyle='--', linewidth=0.5)
+                plt.tight_layout()
+                fig.savefig(map_image_path, dpi=150)
                 plt.close(fig)
 
-                # Page 2: Area info
-                fig, ax = plt.subplots()
-                ax.axis("off")
-                ax.text(0.1, 0.5, f"Estimated Flooded Area:\n{area:.2f} sq.km", fontsize=16)
-                pdf.savefig(fig)
-                plt.close(fig)
+            # Create PDF
+            pdf = FPDF()
+            pdf.add_page()
 
+            # Title
+            pdf.set_font("Arial", "B", 16)
+            pdf.cell(0, 10, "Flood Detection Report", ln=True, align='C')
+
+            # Timestamp
+            pdf.set_font("Arial", size=12)
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            pdf.cell(0, 10, f"Timestamp: {timestamp}", ln=True)
+
+            # Area info
+            pdf.cell(0, 10, f"Estimated Flooded Area: {area:.2f} sq.km", ln=True)
+
+            # Add flood map image
+            pdf.image(map_image_path, x=10, y=50, w=180)
+
+            # Save PDF
+            pdf_path = "output/flood_report_bonus.pdf"
+            pdf.output(pdf_path)
+
+            # Offer download
             with open(pdf_path, "rb") as f:
-                st.download_button("Download PDF Report", f, "flood_report.pdf", mime="application/pdf")
+                st.download_button("📥 Download Bonus PDF Report", f, "flood_report_bonus.pdf", mime="application/pdf")
 
     except Exception as e:
         st.error(f"❌ Error during flood detection: {str(e)}")
